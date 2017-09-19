@@ -139,13 +139,16 @@
             //OBS Client
             const obs = new OBSWebSocket();
 
-            document.getElementById('connect').addEventListener('click', e => {
-                const address = document.getElementById('address').value;
+            function connect() {
+                document.getElementById('connect').addEventListener('click', e => {
+                    const address = document.getElementById('address').value;
 
-                obs.connect({
-                    address: address
+                    obs.connect({
+                        address: address
+                    });
                 });
-            });
+            }
+            connect();
 
             document.getElementById("address")
                     .addEventListener("keyup", function (event) {
@@ -201,6 +204,10 @@
                     document.getElementById(document.getElementById("log").innerHTML).style.background = "#d9d9d9";
                 document.getElementById(data.sceneName).style.background = "#00ffbf";
                 document.getElementById("log").innerHTML = data.sceneName;
+            });
+            obs.on('error', err => {
+                console.error('socket error:', err);
+                connect();
             });
         </script>
     </body>
