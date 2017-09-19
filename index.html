@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>OBS Scene Control</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="obs-websocket.js"></script>
+        <style>
+            .bg-ok{
+                background-color: #0F0;
+            }
+            .bg-warning{
+                background-color: #F60;
+            }
+            .bg-danger{
+                background-color: #F00;
+            }
+
+            .obs-scene-id.scene-active{
+                background-color: #00FF00;
+            }
+            .obs-scene-id{
+                background-color: #EEEEEE;
+            }
+            .myButtonScene
+            {
+              padding:8vh 15vh;
+              font-size:35pt;
+              vertical-align: middle;
+            }
+        </style>
+        <script>
+            var interval;
+            function displayTimer() {
+                // document.getElementById("timer").innerHTML = document.getElementById("setTimer").value;
+                $('#timer').html($('#setTimer').val());
+                //toggleFullScreen();
+            }
+
+            function startTimer() {
+                //Timer
+                //var timerValue = parseInt(document.getElementById("timer").innerHTML);
+                var timerValue = parseInt($('#timer').html());
+                var setTimer = new Date();
+                //alert(timerValue);
+                setTimer.setMinutes(setTimer.getMinutes() + timerValue);
+                setTimer.setSeconds(setTimer.getSeconds() + 1);
+                var countDownDate = setTimer.getTime();
+
+                // Update the count down every 1 second
+                interval = setInterval(function () {
+
+                    // Get todays date and time
+                    var now = new Date().getTime();
+
+                    // Find the distance between now an the count down date
+                    var distance = countDownDate - now;
+
+                    // Time calculations for minutes and seconds
+                    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.abs(Math.floor((distance % (1000 * 60)) / 1000));
+                    if (minutes >= 1) {
+//                        document.getElementById("rectangle").style.background = "#00ff00";
+//                        document.getElementById("rectangle2").style.background = "#00ff00";
+                        $('.indicate').removeClass('bg-danger').removeClass('bg-warning').addClass('bg-ok');
+                    } else if (minutes >= 0) {
+                        //document.getElementById("rectangle").style.background = "#ff6600";
+                        //document.getElementById("rectangle2").style.background = "#ff6600";
+                        $('.indicate').removeClass('bg-danger').removeClass('bg-ok').addClass('bg-warning');
+                    } else {
+                        //document.getElementById("rectangle").style.background = "#ff0000";
+                        //document.getElementById("rectangle2").style.background = "#ff0000";
+                        $('.indicate').removeClass('bg-ok').removeClass('bg-warning').addClass('bg-danger');
+                        if (minutes < 0)
+                            minutes = Math.ceil((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        if (minutes == 0)
+                            minutes = '-' + minutes;
+                    }
+                    if (seconds < 10)
+                        seconds = '0' + seconds;
+
+                    // Output the result in an element with id="demo"
+//                    document.getElementById("countdown_timer").innerHTML = minutes + ":" + seconds;
+                    $('#countdown_timer').html(minutes + ":" + seconds);
+                    // If the count down is over, write some text
+                    /*
+                     if (distance < 0) {
+                     clearInterval(x);
+                     document.getElementById("countdown_timer").innerHTML = "EXPIRED";
+                     }
+                     */
+                }, 200);
+            }
+
+            function stopTimer() {
+                clearInterval(interval);
+            }
+
+            function setCookie()
+            {
+                checkCookie();
+                var cname = "address";
+                //var cvalue = document.getElementById("address").value;
+                var cvalue = $('#address').val();
+                var exdays = 7;
+                var d = new Date();
+                d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+                var expires = "expires=" + d.toGMTString();
+                document.cookie = cname + "=" + cvalue + "; " + expires;
+            }
+            function getCookie(cname)
+            {
+                var name = cname + "=";
+                var ca = document.cookie.split(';');
+                for (var i = 0; i < ca.length; i++)
+                {
+                    var c = ca[i].trim();
+                    if (c.indexOf(name) == 0)
+                        return c.substring(name.length, c.length);
+                }
+                return "";
+            }
+            function checkCookie()
+            {
+                var address = getCookie("address");
+                if (address != "")
+                {
+                    console.log("Welcome again " + address);
+                    //document.getElementById('address').value = address;
+                    $('#address').val(address);
+                }
+            }
+            function toggleFullScreen() {
+              if (!document.fullscreenElement &&    // alternative standard method
+                  !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
+                if (document.documentElement.requestFullscreen) {
+                  document.documentElement.requestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                  document.documentElement.msRequestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                  document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                  document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                }
+              } else {
+                if (document.exitFullscreen) {
+                  document.exitFullscreen();
+                } else if (document.msExitFullscreen) {
+                  document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                  document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                  document.webkitExitFullscreen();
+                }
+              }
+            }
+        </script>
+    </head>
+    <body id="body">
+
+        <div id="blog1" >
+
+        </div>
+        <div class="col-sm-12 indicate" style="height:8vh"></div>
+        <div id='content' class='row'>
+            <div id="scene_list" class="btn-group-vertical col-sm-4">
+                <a id="CAM1" class="btn btn-default obs-scene-id myButtonScene" data-obs="CAM1">CAM1</a>
+                <a id="CAM2" class="btn btn-default obs-scene-id myButtonScene" data-obs="CAM2">CAM2</a>
+                <a id="PAUSE" class="btn btn-default obs-scene-id myButtonScene" data-obs="PAUSE">PAUSE</a>
+            </div>
+
+            <div class="col-sm-8">
+                <div id="blog2">
+                    <p id="countdown_timer" class="text-center" style="font-size: 180pt;">00:00</p>
+                </div>
+
+                <div class="form-inline center" style="margin-top: 30px;">
+                    <input id="setTimer" class="form-control" value="10"><a href="#" class="btn btn-default" onclick="displayTimer()">Set Timer</a>
+                    <div>Count down timer: <span id="timer">10</span> min</div>
+                </div>
+
+                <div id="connection" class="form-inline center" style="margin-top: 30px;">
+                    <input id="address" class="form-control" placeholder="Address : Port"><a href="#" id="connect" class="btn btn-default">Connect</a>
+
+                </div>
+
+                <div class="form-inline center" style="margin-top: 8px;">
+                    <label>Status: <span id="status" style="color:#ff0000" class="form-control">disconnect</span></label>
+                    <a href="#" id="disconnect" class="btn btn-danger" onClick="window.location.reload()">Disconnect</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 indicate" style="height:8vh;"></div>
+
+
+        <script>
+            //init
+            //startTimer();
+            checkCookie();
+
+            //OBS Client
+            var obs = new OBSWebSocket();
+
+            function connect() {
+                var val = $('#address').val();
+                obs.connect({
+                    'address': val
+                }).catch(function (err) {
+                    alert(err.message);
+                });
+            }
+
+            $('#connect').on('click', function () {
+                connect();
+            }).show();
+            $('#disconnect').hide();
+
+            $('#address').on('change', connect);
+
+            document.getElementById("setTimer")
+                    .addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if (event.keyCode == 13) {
+                            displayTimer();
+                        }
+                    });
+
+            obs.onConnectionOpened(() => {
+                //fullScreen();
+                setCookie();
+                $('.indicate').removeClass('bg-warning').removeClass('bg-danger').addClass('bg-ok');
+                //document.getElementById("status").innerHTML = "Connected";
+                $('#status').html("Connected");
+                //document.getElementById("status").style.color = "#00ff00";
+                $('#status').css("color", "#00ff00");
+                //document.getElementById('blog1').style.visibility = 'visible';
+                //document.getElementById('connect').style.visibility = 'hidden';
+                //document.getElementById('address').style.visibility = 'hidden';
+//                document.getElementById('connection').style.display = 'none';
+                $('#connection').hide();
+                $('#disconnect').show();
+                $('.obs-scene-id').on('click', function (event) {
+                    obs.setCurrentScene({
+                        'scene-name': $(event.target).data('obs'),
+                    });
+                });
+//                document.getElementById('disconnect').style.visibility = 'visible';
+//                obs.getSceneList().then(data => {
+////                    const sceneListDiv = document.getElementById('scene_list');
+//                    const sceneListDiv = $('#scene_list');
+//
+//                    data.scenes.forEach(scene => {
+//                        $('#' + scene.name).addClass('')
+//                        var sce
+//                        var sceneElement = document.getElementById(scene.name);
+//                        sceneElement.style.background = "#d9d9d9";
+//                        sceneElement.onclick = function () {
+//
+//                            obs.setCurrentScene({
+//                                'scene-name': scene.name
+//                            });
+//                        };
+//
+//                        sceneListDiv.appendChild(sceneElement);
+//                    });
+//                })
+            });
+
+
+
+            obs.onSwitchScenes(data => {
+                stopTimer();
+                startTimer();
+                console.log('New Active Scene:', data.sceneName);
+                $('.scene-active').removeClass('scene-active');
+                $('#' + data.sceneName).addClass('scene-active');
+//                if (document.getElementById("log").innerHTML !== "")
+//                    document.getElementById(document.getElementById("log").innerHTML).style.background = "#d9d9d9";
+//                document.getElementById(data.sceneName).style.background = "#00ffbf";
+//                document.getElementById("log").innerHTML = data.sceneName;
+            });
+            obs.on('error', err => {
+                console.error('socket error:', err);
+                connect();
+            });
+        </script>
+    </body>
+</html>
