@@ -2738,7 +2738,7 @@ exports.clearImmediate = global.clearImmediate;
         installMessageChannelImplementation();
 
     } else if (doc && "onreadystatechange" in doc.createElement("script")) {
-        // For IE 6–8
+        // For IE 6ï¿½8
         installReadyStateChangeImplementation();
 
     } else {
@@ -2802,15 +2802,14 @@ class Socket extends EventEmitter {
   async connect(args = {}, callback) {
     args = args || {};
     const address = args.address || 'localhost:4444';
-
     if (this._connected) {
       this._socket.close();
     }
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       try {
-        await this._connect(address);
-        await this._authenticate(args.password);
+        this._connect(address);
+        this._authenticate(args.password);
         resolve();
       } catch (err) {
         this._socket.close();
@@ -2833,7 +2832,7 @@ class Socket extends EventEmitter {
       let settled = false;
 
       debug('Attempting to connect to: %s', address);
-      this._socket = new WebSocket('wss://' + address);
+      this._socket = new WebSocket('ws://' + address);
 
       // We only handle the initial connection error.
       // Beyond that, the consumer is responsible for adding their own generic `error` event listener.
