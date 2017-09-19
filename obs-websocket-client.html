@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>OBS Scene Control</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="obs-websocket.js"></script>
+        <script>
+            var x;
+            function displayTimer() {
+                document.getElementById("timer").innerHTML = document.getElementById("setTimer").value;
+            }
+
+            function startTimer() {
+                //Timer
+                var timerValue = parseInt(document.getElementById("timer").innerHTML);
+                var setTimer = new Date();
+                //alert(timerValue);
+                setTimer.setMinutes(setTimer.getMinutes() + timerValue);
+                var countDownDate = setTimer.getTime();
+
+                // Update the count down every 1 second
+                x = setInterval(function () {
+
+                    // Get todays date and time
+                    var now = new Date().getTime();
+
+                    // Find the distance between now an the count down date
+                    var distance = countDownDate - now;
+
+                    // Time calculations for minutes and seconds
+                    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.abs(Math.floor((distance % (1000 * 60)) / 1000));
+                    if (seconds < 10)
+                        seconds = '0' + seconds;
+
+                    if (minutes >= 1) {
+                        document.getElementById("rectangle").style.background = "#00ff00";
+                    } else if (minutes >= 0) {
+                        document.getElementById("rectangle").style.background = "#ff6600";
+                    } else {
+                        document.getElementById("rectangle").style.background = "#ff0000";
+                    }
+
+                    // Output the result in an element with id="demo"
+                    document.getElementById("countdown_timer").innerHTML = minutes + ":" + seconds;
+
+                    // If the count down is over, write some text 
+                    /*
+                     if (distance < 0) {
+                     clearInterval(x);
+                     document.getElementById("countdown_timer").innerHTML = "EXPIRED";
+                     }
+                     */
+                }, 1000);
+            }
+
+            function stopTimer() {
+                clearInterval(x);
+            }
+        </script>
+    </head>
+    <body>
+
+        <div id="connection" class="form-inline">
+            <input id="address" class="form-control" placeholder="Address : Port" value="172.18.2.58:8888"><button id="connect" class="btn">Connect</button>
+
+        </div>
+        <div class="form-inline">
+            <label>Status: <span id="status" style="color:#ff0000" class="form-control">disconnect</span></label>
+            <input id="disconnect" class="btn" type="button" value="Disconnect" onClick="window.location.reload()">
+        </div>
+
+        <div id="blog1" >
+            <div id="scene_list" class="btn-group btn-group-justified" style="height: 30vh;">
+                <a id="CAM1" class="btn btn-default">CAM1</a>
+                <a id="CAM2" class="btn btn-default">CAM2</a>
+                <a id="PAUSE" class="btn btn-default">PAUSE</a>
+            </div>
+            <div class="form-inline">
+                <input id="setTimer" class="form-control" value="5"><button type="button" class="btn" onclick="displayTimer()">Set Timer</button>
+                <div>Count down timer: <span id="timer">5</span> min</div>
+            </div>
+        </div>
+        <div id="blog2">
+            <div id="rectangle" style=" width:200px;height:8vh;background:#00ff00;"></div>
+            <div><span id="countdown_timer" style="font-size: 400%;"></span></div>
+        </div>
+
+        <p id="log"></p>
+
+        <script>
+            //init
+            //document.getElementById('blog1').style.visibility = 'hidden';
+            document.getElementById('blog2').style.visibility = 'hidden';
+            document.getElementById('disconnect').style.visibility = 'hidden';
+            document.getElementById('log').style.visibility = 'hidden';
+
+            startTimer();
+
+            //OBS Client
+            const obs = new OBSWebSocket();
+
+            document.getElementById('connect').addEventListener('click', e => {
+                const address = document.getElementById('address').value;
+
+                obs.connect({
+                    address: address
+                });
+            });
+
+            document.getElementById("address")
+                    .addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if (event.keyCode == 13) {
+                            document.getElementById("connect").click();
+                        }
+                    });
+            document.getElementById("setTimer")
+                    .addEventListener("keyup", function (event) {
+                        event.preventDefault();
+                        if (event.keyCode == 13) {
+                            displayTimer();
+                        }
+                    });
+
+            obs.onConnectionOpened(() => {
+                document.getElementById("status").innerHTML = "Connected";
+                document.getElementById("status").style.color = "#00ff00";
+                //document.getElementById('blog1').style.visibility = 'visible';
+                //document.getElementById('connect').style.visibility = 'hidden';
+                //document.getElementById('address').style.visibility = 'hidden';
+                document.getElementById('connection').style.display = 'none';
+                document.getElementById('disconnect').style.visibility = 'visible';
+                obs.getSceneList().then(data => {
+                    const sceneListDiv = document.getElementById('scene_list');
+
+                    data.scenes.forEach(scene => {
+                        const sceneElement = document.getElementById(scene.name);
+                        sceneElement.style.background = "#d9d9d9";
+                        sceneElement.onclick = function () {
+
+                            obs.setCurrentScene({
+                                'scene-name': scene.name
+                            });
+                        };
+
+                        sceneListDiv.appendChild(sceneElement);
+                    });
+                })
+            });
+
+
+
+            obs.onSwitchScenes(data => {
+                //status ok
+                document.getElementById('blog2').style.visibility = 'visible';
+                stopTimer();
+                startTimer();
+                console.log('New Active Scene:', data.sceneName);
+                if (document.getElementById("log").innerHTML !== "")
+                    document.getElementById(document.getElementById("log").innerHTML).style.background = "#d9d9d9";
+                document.getElementById(data.sceneName).style.background = "#00ffbf";
+                document.getElementById("log").innerHTML = data.sceneName;
+            });
+        </script>
+    </body>
+</html>
